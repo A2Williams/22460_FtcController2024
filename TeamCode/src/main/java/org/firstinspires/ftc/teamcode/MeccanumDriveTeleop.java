@@ -74,6 +74,8 @@ public class MeccanumDriveTeleop extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
+    private DcMotor lift1move = null;
+    private DcMotor lift2move = null;
 
     // the value for percsion mode
     private final double PERCISION_VALUE = 0.5;
@@ -87,6 +89,10 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         leftBackDrive = hardwareMap.get(DcMotor.class, "back left");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "front right");
         rightBackDrive = hardwareMap.get(DcMotor.class, "back right");
+
+        //lift motor initialization
+        lift1move = hardwareMap.get(DcMotor.class,  "lift1");
+        lift2move = hardwareMap.get(DcMotor.class, "lift2");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -102,6 +108,10 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+
+        //lift motors
+        lift1move.setDirection(DcMotorSimple.Direction.FORWARD);
+        lift2move.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -167,6 +177,23 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             rightFrontDrive.setPower(rightFrontPower);
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
+
+            // push the lift up...
+            if (gamepad2.dpad_up) {
+                lift1move.setPower(-1);
+                lift2move.setPower(-1);
+            }
+            if (gamepad2.dpad_down) {
+                lift1move.setPower(1);
+                lift2move.setPower(1);
+            }
+            else {
+                lift1move.setPower(0);
+                lift2move.setPower(0);
+            }
+
+            // and down
+
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
