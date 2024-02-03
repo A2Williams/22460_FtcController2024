@@ -213,12 +213,10 @@ public class MeccanumDriveTeleop extends LinearOpMode {
 
             // opens and closes arm
             if (gamepad2.square) {
-                servo2rotate.setPosition(servopos + 0.1);
-                servopos = (servopos + 0.1);
+                servo2rotate.setPosition(0.4556);
             }
-            if (gamepad2.square) {
-                servo2rotate.setPosition(servopos - 0.1);
-                servopos = (servopos - 0.1);
+            if (gamepad2.circle) {
+                servo2rotate.setPosition(0.7);
             }
 
 
