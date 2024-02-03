@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -76,6 +77,8 @@ public class MeccanumDriveTeleop extends LinearOpMode {
     private DcMotor rightBackDrive = null;
     private DcMotor lift1move = null;
     private DcMotor lift2move = null;
+    private Servo servo1rotate = null;
+    private Servo servo2rotate = null;
 
     // the value for percsion mode
     private final double PERCISION_VALUE = 0.5;
@@ -94,6 +97,9 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         lift1move = hardwareMap.get(DcMotor.class,  "lift1");
         lift2move = hardwareMap.get(DcMotor.class, "lift2");
 
+        //servo initialization
+        servo1rotate = hardwareMap.get(Servo.class, "servo1");
+        servo2rotate = hardwareMap.get(Servo.class, "servo2");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -112,6 +118,9 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         //lift motors
         lift1move.setDirection(DcMotorSimple.Direction.FORWARD);
         lift2move.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        //Sets servo var
+        double servopos = 0;
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -178,21 +187,40 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
-            // push the lift up...
+            // push the lift up.
             if (gamepad2.dpad_up) {
                 lift1move.setPower(-1);
                 lift2move.setPower(-1);
             }
+            // Pushed lift down.
             if (gamepad2.dpad_down) {
                 lift1move.setPower(1);
                 lift2move.setPower(1);
             }
+            // Lift does nothing.
             else {
                 lift1move.setPower(0);
                 lift2move.setPower(0);
             }
 
-            // and down
+            // rotates secondary arm
+            if (gamepad2.left_bumper) {
+                servo1rotate.setPosition(0.556);
+            }
+            if (gamepad2.right_bumper) {
+                servo1rotate.setPosition(0.322);
+            }
+
+            // opens and closes arm
+            if (gamepad2.square) {
+                servo2rotate.setPosition(servopos + 0.1);
+                servopos = (servopos + 0.1);
+            }
+            if (gamepad2.square) {
+                servo2rotate.setPosition(servopos - 0.1);
+                servopos = (servopos - 0.1);
+            }
+
 
 
             // Show the elapsed game time and wheel power.
