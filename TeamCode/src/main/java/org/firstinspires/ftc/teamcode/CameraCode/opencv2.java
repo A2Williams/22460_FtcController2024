@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.CameraCode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -18,15 +18,26 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.util.Range;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@TeleOp(name = "OpenCV Testing Red")
+@TeleOp(name = "OpenCV Red Drive")
 
 public class opencv2 extends LinearOpMode {
-
+    private ElapsedTime runtime = new ElapsedTime();
+    private DcMotor  rightDrive;
+    private DcMotor leftDrive;
+    private DcMotor backDrive;
+    private DcMotor skyLift;
+    private CRServo droneLaunch;
     double cX = 0;
+    double nX = 0;
     double cY = 0;
     double width = 0;
 
@@ -42,6 +53,40 @@ public class opencv2 extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+        double vertical;
+        double horizontal;
+        double pivot;
+        double rightMotor;
+        double leftMotor;
+        double backMotor;
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
+        // Initialize the hardware variables. Note that the strings used here as parameters
+        // to 'get' must correspond to the names assigned during the robot configuration
+        // step (using the FTC Robot Controller app on the phone).
+
+        leftDrive = hardwareMap.get(DcMotor.class, "leftDrive");
+        rightDrive = hardwareMap.get(DcMotor.class, "rightDrive");
+        backDrive = hardwareMap.get(DcMotor.class, "backDrive");
+        skyLift = hardwareMap.get(DcMotor.class, "skyLift");
+        droneLaunch = hardwareMap.get(CRServo.class, "droneLaunch");
+
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backDrive.setDirection(DcMotor.Direction.REVERSE);
+        backDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        skyLift.setDirection(DcMotor.Direction.REVERSE);
+        droneLaunch.setDirection(CRServo.Direction.FORWARD);
+
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+        runtime.reset();
+
+
         initOpenCV();
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
@@ -51,6 +96,45 @@ public class opencv2 extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+
+
+            // run until the end of the match (driver presses STOP) Holonomic Drive Code, Lift & Drone release
+            while (opModeIsActive()) {
+                vertical = gamepad1.right_stick_y;
+                horizontal = gamepad1.right_stick_x;
+                pivot = gamepad1.left_stick_x;
+                rightMotor = Range.clip((-0.5 * horizontal - (Math.sqrt(3)/2) * vertical)- pivot, -1.0, 1.0);
+                leftMotor = Range.clip((-0.5 * horizontal + (Math.sqrt(3)/2) * vertical)- pivot,-1.0, 1.0);
+                backMotor = Range.clip((horizontal - pivot), -1.0, 1.0);
+
+                leftDrive.setPower(leftMotor);
+                rightDrive.setPower(rightMotor);
+                backDrive.setPower(backMotor);
+
+                if (gamepad2.dpad_up) {
+                    skyLift.setPower(0.75);
+                } else if (gamepad2.dpad_down) {
+                    skyLift.setPower(-0.75);
+                } else {
+                    skyLift.setPower(0);
+                }
+
+                if (gamepad2.dpad_up) {
+                    droneLaunch.setPower(1);
+                } else if (gamepad2.dpad_down) {
+                    droneLaunch.setPower(-1);
+                } else {
+                    droneLaunch.setPower(0);
+                }
+
+                // Show the elapsed game time and wheel power.
+                telemetry.addData("Status", "Run Time: " + runtime.toString());
+                telemetry.addData("Motors", "left (%.2f), right (%.2f), back (%.2f)", leftMotor, rightMotor, backMotor);
+                telemetry.update();
+            }
+
+
+
             telemetry.addData("Coordinate", "(" + (int) cX + ", " + (int) cY + ")");
             telemetry.addData("Distance in Inch", (getDistance(width)));
             telemetry.update();
@@ -92,6 +176,20 @@ public class opencv2 extends LinearOpMode {
             MatOfPoint largestContour = findLargestContour(contours);
 
             if (largestContour != null) {
+
+                if (cX < 120) and (cX > 80); {
+                    ;
+                }
+                if (largestContour != null) {
+                    if (cX > 120) {
+                    // cone too far right
+                    }
+                    if (cX < 80) {
+                        // cone too far left
+                    }
+                }
+
+
                 // Draw a red outline around the largest detected object
                 Imgproc.drawContours(input, contours, contours.indexOf(largestContour), new Scalar(255, 0, 0), 2);
                 // Calculate the width of the bounding box

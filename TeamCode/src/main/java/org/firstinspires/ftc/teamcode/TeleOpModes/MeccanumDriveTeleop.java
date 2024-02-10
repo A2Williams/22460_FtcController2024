@@ -27,16 +27,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.TeleOpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import com.qualcomm.robotcore.hardware.Servo;
 /*
  * This file contains an example of a Linear "OpMode".
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
@@ -78,7 +78,7 @@ public class MeccanumDriveTeleop extends LinearOpMode {
     private DcMotor lift1move = null;
     private DcMotor lift2move = null;
     private Servo servo1rotate = null;
-    private Servo servo2rotate = null;
+    private CRServo servo2rotate = null;
 
     // the value for percsion mode
     private final double PERCISION_VALUE = 0.5;
@@ -99,7 +99,7 @@ public class MeccanumDriveTeleop extends LinearOpMode {
 
         //servo initialization
         servo1rotate = hardwareMap.get(Servo.class, "servo1");
-        servo2rotate = hardwareMap.get(Servo.class, "servo2");
+        servo2rotate = hardwareMap.get(CRServo.class, "servo2");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -120,7 +120,7 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         lift2move.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //Sets servo var
-        double servopos = 0;
+        double position = 0.0;
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -204,19 +204,14 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             }
 
             // rotates secondary arm
-            if (gamepad2.left_bumper) {
-                servo1rotate.setPosition(0.556);
-            }
-            if (gamepad2.right_bumper) {
-                servo1rotate.setPosition(0.322);
-            }
 
-            // opens and closes arm
-            if (gamepad2.square) {
-                servo2rotate.setPosition(0.4556);
+
+
+            if(gamepad2.right_bumper) {
+                servo1rotate.setPosition(0.32);
             }
-            if (gamepad2.circle) {
-                servo2rotate.setPosition(0.7);
+            if(gamepad2.left_bumper) {
+                servo1rotate.setPosition(0.55);
             }
 
 
@@ -225,6 +220,7 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+            telemetry.addData("servo1 position", "%4.2f", servo1rotate.getPosition());
             telemetry.update();
         }
 
