@@ -2,42 +2,39 @@ package org.firstinspires.ftc.teamcode.CameraCode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.opencv.core.*;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.util.Range;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
-@TeleOp(name = "OpenCV Red Drive")
+@Autonomous(name = "OpenCV_Red")
 
-public class opencv2 extends LinearOpMode {
-    private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor  rightDrive;
-    private DcMotor leftDrive;
-    private DcMotor backDrive;
-    private DcMotor skyLift;
-    private CRServo droneLaunch;
+public class OpenCV_Red extends LinearOpMode {
+    private DcMotor backleft;
+    private DcMotor backright;
+    private DcMotor frontleft;
+    private DcMotor frontright;
+
     double cX = 0;
-    double nX = 0;
     double cY = 0;
     double width = 0;
 
@@ -52,40 +49,10 @@ public class opencv2 extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
-        double vertical;
-        double horizontal;
-        double pivot;
-        double rightMotor;
-        double leftMotor;
-        double backMotor;
-
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-
-        leftDrive = hardwareMap.get(DcMotor.class, "leftDrive");
-        rightDrive = hardwareMap.get(DcMotor.class, "rightDrive");
-        backDrive = hardwareMap.get(DcMotor.class, "backDrive");
-        skyLift = hardwareMap.get(DcMotor.class, "skyLift");
-        droneLaunch = hardwareMap.get(CRServo.class, "droneLaunch");
-
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backDrive.setDirection(DcMotor.Direction.REVERSE);
-        backDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        skyLift.setDirection(DcMotor.Direction.REVERSE);
-        droneLaunch.setDirection(CRServo.Direction.FORWARD);
-
-        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-        runtime.reset();
-
+        backleft = hardwareMap.get(DcMotor.class, "back left");
+        backright = hardwareMap.get(DcMotor.class, "back right");
+        frontleft = hardwareMap.get(DcMotor.class, "front left");
+        frontright = hardwareMap.get(DcMotor.class, "front right");
 
         initOpenCV();
         FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -94,49 +61,83 @@ public class opencv2 extends LinearOpMode {
 
 
         waitForStart();
+        backleft.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontleft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backright.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontright.setDirection(DcMotorSimple.Direction.FORWARD);
+
 
         while (opModeIsActive()) {
-
-
-            // run until the end of the match (driver presses STOP) Holonomic Drive Code, Lift & Drone release
-            while (opModeIsActive()) {
-                vertical = gamepad1.right_stick_y;
-                horizontal = gamepad1.right_stick_x;
-                pivot = gamepad1.left_stick_x;
-                rightMotor = Range.clip((-0.5 * horizontal - (Math.sqrt(3)/2) * vertical)- pivot, -1.0, 1.0);
-                leftMotor = Range.clip((-0.5 * horizontal + (Math.sqrt(3)/2) * vertical)- pivot,-1.0, 1.0);
-                backMotor = Range.clip((horizontal - pivot), -1.0, 1.0);
-
-                leftDrive.setPower(leftMotor);
-                rightDrive.setPower(rightMotor);
-                backDrive.setPower(backMotor);
-
-                if (gamepad2.dpad_up) {
-                    skyLift.setPower(0.75);
-                } else if (gamepad2.dpad_down) {
-                    skyLift.setPower(-0.75);
-                } else {
-                    skyLift.setPower(0);
-                }
-
-                if (gamepad2.dpad_up) {
-                    droneLaunch.setPower(1);
-                } else if (gamepad2.dpad_down) {
-                    droneLaunch.setPower(-1);
-                } else {
-                    droneLaunch.setPower(0);
-                }
-
-                // Show the elapsed game time and wheel power.
-                telemetry.addData("Status", "Run Time: " + runtime.toString());
-                telemetry.addData("Motors", "left (%.2f), right (%.2f), back (%.2f)", leftMotor, rightMotor, backMotor);
-                telemetry.update();
-            }
-
-
-
+            int reference = 3;
             telemetry.addData("Coordinate", "(" + (int) cX + ", " + (int) cY + ")");
             telemetry.addData("Distance in Inch", (getDistance(width)));
+            backleft.setPower(0);
+            backright.setPower(0);
+            frontleft.setPower(0);
+            frontright.setPower(0);
+            if (cY > 303 && cY < 309){
+                if (cX > 24 && cX < 122){
+                    telemetry.addData("Left","(" + (int) cX + ", " + (int) cY + ")" );
+                    reference = 0;
+                }
+            }
+            if (cY > 301 && cY < 310){
+                if (cX > 214 && cX < 446){
+                    telemetry.addData("Middle","(" + (int) cX + ", " + (int) cY + ")" );
+                    reference = 1;
+                }
+            }
+            if (cY > 313 && cY < 323) {
+                if (cX > 556 && cX < 623) {
+                    telemetry.addData("Right", "(" + (int) cX + ", " + (int) cY + ")");
+                   reference = 2;
+                }
+            }
+            //Randomized towards the left
+            if (reference == 0) {
+                backleft.setPower(0.50);
+                backright.setPower(-0.50);
+                frontleft.setPower(-0.50);
+                frontright.setPower(0.50);
+                sleep(1190);
+                /*backleft.setPower(0.5);
+                backright.setPower(0.5);
+                frontleft.setPower(0.5);
+                frontright.setPower(0.5);
+                sleep(2500);*/
+            }
+            //Randomized towards the middle
+            if (reference == 1) {
+                backleft.setPower(0.5);
+                backright.setPower(-0.5);
+                frontleft.setPower(-0.5);
+                frontright.setPower(0.5);
+                sleep(1190);
+                backleft.setPower(0.5);
+                backright.setPower(0.5);
+                frontleft.setPower(0.5);
+                frontright.setPower(0.5);
+                sleep(2500);
+
+            }
+            //Randomized towards the right
+            if (reference == 2) {
+                backleft.setPower(0.5);
+                backright.setPower(-0.5);
+                frontleft.setPower(-0.5);
+                frontright.setPower(0.5);
+                sleep(1190);
+                backleft.setPower(-0.4);
+                backright.setPower(-0.4);
+                frontleft.setPower(-0.4);
+                frontright.setPower(-0.4);
+                sleep(500);
+                backleft.setPower(0.5);
+                backright.setPower(0.5);
+                frontleft.setPower(0.5);
+                frontright.setPower(0.5);
+                sleep(2500);
+            }
             telemetry.update();
 
             // The OpenCV pipeline automatically processes frames and handles detection
@@ -176,20 +177,6 @@ public class opencv2 extends LinearOpMode {
             MatOfPoint largestContour = findLargestContour(contours);
 
             if (largestContour != null) {
-
-                if (cX < 120) and (cX > 80); {
-                    ;
-                }
-                if (largestContour != null) {
-                    if (cX > 120) {
-                    // cone too far right
-                    }
-                    if (cX < 80) {
-                        // cone too far left
-                    }
-                }
-
-
                 // Draw a red outline around the largest detected object
                 Imgproc.drawContours(input, contours, contours.indexOf(largestContour), new Scalar(255, 0, 0), 2);
                 // Calculate the width of the bounding box
