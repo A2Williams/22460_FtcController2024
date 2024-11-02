@@ -32,6 +32,8 @@ import java.util.List;
 
 public class AutonomousTest extends LinearOpMode {
 
+    //establishing motors
+
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;
