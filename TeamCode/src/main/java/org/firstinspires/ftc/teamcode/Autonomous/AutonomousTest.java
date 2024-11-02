@@ -43,7 +43,7 @@ public class AutonomousTest extends LinearOpMode {
     @Override
     public void runOpMode(){
 
-        //assigning Volitle Variables
+        //assigning Volitle Variables Not needed?
         double horizontal;
         double vertical;
         double pivot;
