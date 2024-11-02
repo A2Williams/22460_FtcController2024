@@ -75,10 +75,10 @@ public class MeccanumDriveTeleop extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
-    private DcMotor lift1move = null;
-    private DcMotor lift2move = null;
-    private Servo servo1rotate = null;
-    private CRServo servo2rotate = null;
+    //private DcMotor lift1move = null;
+    //private DcMotor lift2move = null;
+    //private Servo servo1rotate = null;
+    //private CRServo servo2rotate = null;
 
     // the value for percsion mode
     private final double PERCISION_VALUE = 0.5;
@@ -94,12 +94,12 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         rightBackDrive = hardwareMap.get(DcMotor.class, "back right");
 
         //lift motor initialization
-        lift1move = hardwareMap.get(DcMotor.class,  "lift1");
-        lift2move = hardwareMap.get(DcMotor.class, "lift2");
+        //lift1move = hardwareMap.get(DcMotor.class,  "lift1");
+        //lift2move = hardwareMap.get(DcMotor.class, "lift2");
 
         //servo initialization
-        servo1rotate = hardwareMap.get(Servo.class, "servo1");
-        servo2rotate = hardwareMap.get(CRServo.class, "servo2");
+        //servo1rotate = hardwareMap.get(Servo.class, "servo1");
+        //servo2rotate = hardwareMap.get(CRServo.class, "servo2");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -116,8 +116,8 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
         //lift motors
-        lift1move.setDirection(DcMotorSimple.Direction.FORWARD);
-        lift2move.setDirection(DcMotorSimple.Direction.FORWARD);
+       // lift1move.setDirection(DcMotorSimple.Direction.FORWARD);
+        //lift2move.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //Sets servo var
         double position = 0.0;
@@ -188,31 +188,31 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             rightBackDrive.setPower(rightBackPower);
 
             // push the lift up.
-            if (gamepad2.dpad_up) {
-                lift1move.setPower(-1);
-                lift2move.setPower(-1);
-            }
+            //if (gamepad2.dpad_up) {
+                //lift1move.setPower(-1);
+                //lift2move.setPower(-1);
+            //}
             // Pushed lift down.
-            if (gamepad2.dpad_down) {
-                lift1move.setPower(1);
-                lift2move.setPower(1);
-            }
+            //if (gamepad2.dpad_down) {
+              //  lift1move.setPower(1);
+                //lift2move.setPower(1);
+            //}
             // Lift does nothing.
-            else {
-                lift1move.setPower(0);
-                lift2move.setPower(0);
-            }
+           // else {
+             //   lift1move.setPower(0);
+               // lift2move.setPower(0);
+            //}
 
             // rotates secondary arm
 
 
 
-            if(gamepad2.right_bumper) {
-                servo1rotate.setPosition(0.32);
-            }
-            if(gamepad2.left_bumper) {
-                servo1rotate.setPosition(0.55);
-            }
+            //if(gamepad2.right_bumper) {
+              //  servo1rotate.setPosition(0.32);
+            //}
+            //if(gamepad2.left_bumper) {
+              //  servo1rotate.setPosition(0.55);
+            //}
 
 
 
@@ -220,7 +220,7 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
-            telemetry.addData("servo1 position", "%4.2f", servo1rotate.getPosition());
+           // telemetry.addData("servo1 position", "%4.2f", servo1rotate.getPosition());
             telemetry.update();
         }
 
