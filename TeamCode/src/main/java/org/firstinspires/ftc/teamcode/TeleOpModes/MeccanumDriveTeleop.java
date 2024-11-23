@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode.TeleOpModes;
 
+import android.icu.text.Transliterator;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -75,10 +77,12 @@ public class MeccanumDriveTeleop extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
-    //private DcMotor lift1move = null;
-    //private DcMotor lift2move = null;
-    //private Servo servo1rotate = null;
-    //private CRServo servo2rotate = null;
+
+
+    private CRServo HorizontalActuator = null;
+    private CRServo VerticalLift = null;
+    private Servo ScoopServo = null;
+    private CRServo ServoWheel  = null;
 
     // the value for percsion mode
     private final double PERCISION_VALUE = 0.5;
@@ -90,16 +94,16 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         // to the names assigned during the robot configuration step on the DS or RC devices.
         leftFrontDrive = hardwareMap.get(DcMotor.class, "front left");
         leftBackDrive = hardwareMap.get(DcMotor.class, "back left");
+
         rightFrontDrive = hardwareMap.get(DcMotor.class, "front right");
         rightBackDrive = hardwareMap.get(DcMotor.class, "back right");
 
-        //lift motor initialization
-        //lift1move = hardwareMap.get(DcMotor.class,  "lift1");
-        //lift2move = hardwareMap.get(DcMotor.class, "lift2");
+        HorizontalActuator = hardwareMap.get(CRServo.class, "horizontal acuator");
+        VerticalLift = hardwareMap.get(CRServo.class, "vertical lift");
 
-        //servo initialization
-        //servo1rotate = hardwareMap.get(Servo.class, "servo1");
-        //servo2rotate = hardwareMap.get(CRServo.class, "servo2");
+        ScoopServo = hardwareMap.get(Servo.class, "intake flippy");
+        ServoWheel = hardwareMap.get(CRServo.class, "intake wheel");
+
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -114,6 +118,12 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        HorizontalActuator.setDirection(CRServo.Direction.FORWARD);
+        VerticalLift.setDirection(CRServo.Direction.FORWARD);
+        ScoopServo.setDirection(Servo.Direction.FORWARD);
+        ServoWheel.setDirection(CRServo.Direction.FORWARD);
+
+
 
         //lift motors
        // lift1move.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -131,6 +141,11 @@ public class MeccanumDriveTeleop extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            float lift = gamepad2.right_stick_y;
+            float XArm = gamepad2.left_stick_y;
+            float Clockwise = gamepad2.right_trigger;
+            float CClockWise = gamepad2.right_trigger;
+
             double max;
             double percsion = 1.0;
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
@@ -187,32 +202,29 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
-            // push the lift up.
-            //if (gamepad2.dpad_up) {
-                //lift1move.setPower(-1);
-                //lift2move.setPower(-1);
-            //}
-            // Pushed lift down.
-            //if (gamepad2.dpad_down) {
-              //  lift1move.setPower(1);
-                //lift2move.setPower(1);
-            //}
-            // Lift does nothing.
-           // else {
-             //   lift1move.setPower(0);
-               // lift2move.setPower(0);
-            //}
-
-            // rotates secondary arm
+            //Will Extend if left stick is pushed forward and Shorten if pushed backward.
+            HorizontalActuator.setPower(XArm);
+            // Lift up if rightstick is pulled up, lift down if pulled down.
+            VerticalLift.setPower(lift);
 
 
 
-            //if(gamepad2.right_bumper) {
-              //  servo1rotate.setPosition(0.32);
-            //}
-            //if(gamepad2.left_bumper) {
-              //  servo1rotate.setPosition(0.55);
-            //}
+            // Blue Scooper
+            if(gamepad2.right_bumper) {
+                ScoopServo.setPosition(0.2);
+            }
+            else{
+                ScoopServo.setPosition(0);
+            }
+            if(gamepad2.left_bumper) {
+                ScoopServo.setPosition(0.2);
+            }
+            else{
+                ScoopServo.setPosition(0);
+            }
+            ServoWheel.setPower(Clockwise);
+            ServoWheel.setPower(CClockWise);
+
 
 
 

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -39,6 +39,12 @@ public class AutonomousTest extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
+    private CRServo HorizontalActuator = null;
+    private CRServo VerticalLift = null;
+    private CRServo ScoopServo = null;
+
+    private CRServo ServoWheel  = null;
+
 
     @Override
     public void runOpMode(){
@@ -56,11 +62,17 @@ public class AutonomousTest extends LinearOpMode {
 
 
 
-        // assigning directions for motors
+        // assigning directions for motors and servos
         leftFrontDrive = hardwareMap.get(DcMotor.class, "front left");
         leftBackDrive = hardwareMap.get(DcMotor.class, "back left");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "front right");
         rightBackDrive = hardwareMap.get(DcMotor.class, "back right");
+
+        HorizontalActuator = hardwareMap.get(CRServo.class, "horizontal acuator");
+        VerticalLift = hardwareMap.get(CRServo.class, "vertical lift");
+        ScoopServo = hardwareMap.get(CRServo.class, "intake flippy");
+        ServoWheel = hardwareMap.get(CRServo.class, "intake wheel");
+
 
         //Later implement opencv
 
@@ -75,7 +87,19 @@ public class AutonomousTest extends LinearOpMode {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        HorizontalActuator.setDirection(CRServo.Direction.FORWARD);
+
+        VerticalLift.setDirection(CRServo.Direction.FORWARD);
+
+        ScoopServo.setDirection(CRServo.Direction.FORWARD);
+        ServoWheel.setDirection(CRServo.Direction.FORWARD);
+
+
+
+
+
         if (opModeIsActive()){
+
 
             zeroMotors();
 
@@ -89,8 +113,12 @@ public class AutonomousTest extends LinearOpMode {
             //assume 10 seconds (This is for placing specimen)
             sleep(2000);
 
+            //move back to neutral position
+            moveY(-.4,800);
+
             //park
             moveX(-.4,1000);
+
 
 
 
@@ -134,12 +162,27 @@ public class AutonomousTest extends LinearOpMode {
         sleep(waitTime);
         zeroMotors();
     }
+
     //sets motors to a set.power of 0.
     private void zeroMotors(){
         leftFrontDrive.setPower(0);
         leftBackDrive.setPower(0);
         rightFrontDrive.setPower(0);
         rightBackDrive.setPower(0);
+    }
+    //Wheel for intake
+    private void Intake (double power, int waitTime){
+        ServoWheel.setPower(power);
+        sleep(waitTime);
+
+    }
+    private void LiftY(double power, int waitTime){
+        VerticalLift.setPower(power);
+        sleep(waitTime);
+    }
+    private void Actuator (double power, int waitTime){
+        HorizontalActuator.setPower(power);
+        sleep(waitTime);
     }
 
 
