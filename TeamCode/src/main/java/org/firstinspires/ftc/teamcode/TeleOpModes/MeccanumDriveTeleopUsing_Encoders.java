@@ -86,7 +86,7 @@ public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
     private CRServo ServoWheel  = null;
     private Servo BlockServo = null;
 
-    private CRServo BucketV  = null;
+    private Servo BucketV  = null;
 
     // the value for percsion mode
     private final double PERCISION_VALUE = 0.5;
@@ -110,7 +110,7 @@ public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
         ScoopServo2 = hardwareMap.get(Servo.class, "intake flippy2");
 
         ServoWheel = hardwareMap.get(CRServo.class, "intake wheel");
-        BucketV = hardwareMap.get(CRServo.class, "Bucket4Lift");
+        BucketV = hardwareMap.get(Servo.class, "Bucket4Lift");
         BlockServo = hardwareMap.get(Servo.class, "VLiftCLaw");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -148,10 +148,11 @@ public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
         ScoopServo2.setDirection(Servo.Direction.FORWARD);
         ScoopServo2.setPosition(Servo.MIN_POSITION);
 
-        BucketV.setDirection(DcMotorSimple.Direction.FORWARD);
+        BucketV.setDirection(Servo.Direction.FORWARD);
         ServoWheel.setDirection(CRServo.Direction.FORWARD);
         BlockServo.setDirection(Servo.Direction.FORWARD);
         BlockServo.setPosition(Servo.MIN_POSITION);
+
 
 
         //lift motors
@@ -285,13 +286,13 @@ public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
 
             // Blue Scooper
             if(gamepad2.dpad_up) {
-                ScoopServo.setPosition(0.7);
-                ScoopServo2.setPosition(0.7);
+                ScoopServo.setPosition(0.57);
+                ScoopServo2.setPosition(0.57);
             }
 
             if(gamepad2.dpad_down) {
-                ScoopServo.setPosition(0);
-                ScoopServo2.setPosition(0);
+                ScoopServo.setPosition(0.4);
+                ScoopServo2.setPosition(0.4);
 
             }
             if(gamepad2.dpad_right){
@@ -300,8 +301,15 @@ public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
 
             }
 
-            ServoWheel.setPower(Clockwise);
-            ServoWheel.setPower(-CClockWise);
+            if(gamepad2.a){
+                ServoWheel.setPower(1);
+            }
+            if(gamepad2.b){
+                ServoWheel.setPower(-1);
+            }
+            else {
+                ServoWheel.setPower(0);
+            }
 
             //Blue sample holder
             if(gamepad2.right_bumper) {
@@ -311,6 +319,13 @@ public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
             if(gamepad2.left_bumper) {
                 BlockServo.setPosition(0);
             }
+            if(gamepad2.a){
+                BucketV.setPosition(0.5);
+            }
+            if(gamepad2.b){
+                BucketV.setPosition(0.0);
+            }
+
 
 
 
@@ -319,8 +334,9 @@ public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
-            telemetry.addData("servo1 position", "%4.2f", ScoopServo.getPosition());
-            telemetry.addData("servo2 Position", "%4.2f", ScoopServo2.getPosition());
+            telemetry.addData("flippy position", "%4.2f", ScoopServo.getPosition());
+            telemetry.addData("flippy2 Position", "%4.2f", ScoopServo2.getPosition());
+            telemetry.addData("Bucket4Lift Power", "%4.2f", BucketV.getPosition());
             telemetry.addData("EncoderPositionH", TicksH);
             telemetry.addData("EncoderPositionV", TicksV);
             telemetry.addData("RevolutionsH", RevolutionsH);
