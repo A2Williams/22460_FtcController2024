@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 //Declaring our imports
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -10,27 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.imgproc.Moments;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvPipeline;
-
-import java.util.ArrayList;
-import java.util.List;
-
 @Autonomous (name = "Bot-Lobster-Autonomous")
 
-public class AutonomousTest extends LinearOpMode {
+public class AutonomousTestRedRight extends LinearOpMode {
 
     //establishing motors
 
@@ -41,9 +21,12 @@ public class AutonomousTest extends LinearOpMode {
     private DcMotor rightBackDrive = null;
     private CRServo HorizontalActuator = null;
     private CRServo VerticalLift = null;
-    private CRServo ScoopServo = null;
+    private Servo ScoopServo = null;
 
     private CRServo ServoWheel  = null;
+
+    private Servo BlockServo = null;
+
 
 
     @Override
@@ -70,14 +53,17 @@ public class AutonomousTest extends LinearOpMode {
 
         HorizontalActuator = hardwareMap.get(CRServo.class, "horizontal acuator");
         VerticalLift = hardwareMap.get(CRServo.class, "vertical lift");
-        ScoopServo = hardwareMap.get(CRServo.class, "intake flippy");
+        ScoopServo = hardwareMap.get(Servo.class, "intake flippy");
         ServoWheel = hardwareMap.get(CRServo.class, "intake wheel");
+        BlockServo = hardwareMap.get(Servo.class, "VLiftCLaw");
+
 
 
         //Later implement opencv
 
 
         waitForStart();
+        //drivetrain motors
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -87,12 +73,18 @@ public class AutonomousTest extends LinearOpMode {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        //Encoders motors
         HorizontalActuator.setDirection(CRServo.Direction.FORWARD);
 
         VerticalLift.setDirection(CRServo.Direction.FORWARD);
 
-        ScoopServo.setDirection(CRServo.Direction.FORWARD);
+
+        //servos
+        ScoopServo.setDirection(Servo.Direction.FORWARD);
         ServoWheel.setDirection(CRServo.Direction.FORWARD);
+        BlockServo.setDirection(Servo.Direction.FORWARD);
+        BlockServo.setPosition(Servo.MIN_POSITION);
+
 
 
 
@@ -107,17 +99,9 @@ public class AutonomousTest extends LinearOpMode {
 
             //Testing
 
-            //move towards submersible
-            moveY(.4,800);
-
-            //assume 10 seconds (This is for placing specimen)
-            sleep(2000);
-
-            //move back to neutral position
-            moveY(-.4,800);
-
             //park
-            moveX(-.4,1000);
+            moveX(.4,1000);
+
 
 
 
@@ -170,6 +154,11 @@ public class AutonomousTest extends LinearOpMode {
         rightFrontDrive.setPower(0);
         rightBackDrive.setPower(0);
     }
+    //Function for Bucket Servo
+    private void IntakeBucket (double position){
+        ScoopServo.setPosition(position);
+    }
+
     //Wheel for intake
     private void Intake (double power, int waitTime){
         ServoWheel.setPower(power);

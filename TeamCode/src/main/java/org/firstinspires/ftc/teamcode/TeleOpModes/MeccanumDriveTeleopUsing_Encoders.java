@@ -29,18 +29,14 @@
 
 package org.firstinspires.ftc.teamcode.TeleOpModes;
 
-import android.icu.text.Transliterator;
-
-import com.google.blocks.ftcrobotcontroller.util.BlocksArchive;
-import com.qualcomm.hardware.dfrobot.HuskyLens;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 /*
  * This file contains an example of a Linear "OpMode".
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
@@ -69,8 +65,8 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Basic: basic meccanum drive", group="test OpMode")
-public class MeccanumDriveTeleop extends LinearOpMode {
+@TeleOp(name="Basic: basic meccanum driveUsingEncoders", group="test OpMode")
+public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
 
@@ -90,11 +86,14 @@ public class MeccanumDriveTeleop extends LinearOpMode {
     private CRServo ServoWheel  = null;
     private Servo BlockServo = null;
 
+    private CRServo BucketV  = null;
+
     // the value for percsion mode
     private final double PERCISION_VALUE = 0.5;
 
     @Override
     public void runOpMode() {
+
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
@@ -109,7 +108,9 @@ public class MeccanumDriveTeleop extends LinearOpMode {
 
         ScoopServo = hardwareMap.get(Servo.class, "intake flippy");
         ScoopServo2 = hardwareMap.get(Servo.class, "intake flippy2");
+
         ServoWheel = hardwareMap.get(CRServo.class, "intake wheel");
+        BucketV = hardwareMap.get(CRServo.class, "Bucket4Lift");
         BlockServo = hardwareMap.get(Servo.class, "VLiftCLaw");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -121,24 +122,36 @@ public class MeccanumDriveTeleop extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
+
+        //Drive Train Motors
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
+        //Encodered Motors
+
         HorizontalActuator.setDirection(DcMotor.Direction.FORWARD);
+        //
+
+        HorizontalActuator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         VerticalLift.setDirection(DcMotor.Direction.FORWARD);
 
+
+        VerticalLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+        //Servos
         ScoopServo.setDirection(Servo.Direction.FORWARD);
         ScoopServo2.setDirection(Servo.Direction.FORWARD);
         ScoopServo2.setPosition(Servo.MIN_POSITION);
 
-
+        BucketV.setDirection(DcMotorSimple.Direction.FORWARD);
         ServoWheel.setDirection(CRServo.Direction.FORWARD);
         BlockServo.setDirection(Servo.Direction.FORWARD);
         BlockServo.setPosition(Servo.MIN_POSITION);
-
 
 
         //lift motors
@@ -147,6 +160,7 @@ public class MeccanumDriveTeleop extends LinearOpMode {
 
         //Sets servo var
         double position = 0.0;
+
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -157,6 +171,17 @@ public class MeccanumDriveTeleop extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            //Pulses Per Revolution on the GOBILDA Yellow Jacket 5203 Model Motors
+            double PPR = (384.5);
+
+            //Ticks variable tells the exact location of motor through encoders
+            int TicksH = HorizontalActuator.getCurrentPosition();
+            int TicksV = VerticalLift.getCurrentPosition();
+
+            double RevolutionsH = TicksH/PPR;
+            double RevolutionsV = TicksV/PPR;
+
+
             float lift = gamepad2.right_stick_y;
             float XArm = gamepad2.left_stick_y;
             float Clockwise = gamepad2.right_trigger;
@@ -169,7 +194,6 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             double yAxis = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
             double xAxis = gamepad1.left_stick_x;
             double zAxis = gamepad1.right_stick_x;
-
             if (gamepad1.right_bumper) {
                 percsion = PERCISION_VALUE;
             }
@@ -219,11 +243,44 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
-            //Will Extend if left stick is pushed forward and Shorten if pushed backward.
-            HorizontalActuator.setPower(gamepad2.left_stick_y);
-            // Lift up if rightstick is pulled up, lift down if pulled down.
-            VerticalLift.setPower(gamepad2.right_stick_y);
+            //Makes sure that the motors go past ticks 0, and 8250 for the actuator
+            if(XArm > 0 && TicksH > 0) {
 
+                HorizontalActuator.setPower(gamepad2.left_stick_y);
+
+            }
+
+            else if(XArm < 0 && TicksH < 8250) {
+
+                HorizontalActuator.setPower(gamepad2.left_stick_y);
+
+            }
+
+            else {
+
+                HorizontalActuator.setPower(0);
+
+            }
+            //Will Extend if left stick is pushed forward and Shorten if pushed backward.
+
+            // Limits set on the vertical lift so it does not go past ticks 0 and 7800
+            if(lift > 0 && TicksV > 0) {
+
+                VerticalLift.setPower(-lift);
+
+            }
+
+            else if(lift < 0 && TicksV < 7800) {
+
+                VerticalLift.setPower(-lift);
+
+            }
+
+            else {
+
+                VerticalLift.setPower(0);
+
+            }
 
 
             // Blue Scooper
@@ -235,10 +292,12 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             if(gamepad2.dpad_down) {
                 ScoopServo.setPosition(0);
                 ScoopServo2.setPosition(0);
+
             }
             if(gamepad2.dpad_right){
                 ScoopServo.setPosition(0.5);
                 ScoopServo2.setPosition(0.5);
+
             }
 
             ServoWheel.setPower(Clockwise);
@@ -261,6 +320,11 @@ public class MeccanumDriveTeleop extends LinearOpMode {
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.addData("servo1 position", "%4.2f", ScoopServo.getPosition());
+            telemetry.addData("servo2 Position", "%4.2f", ScoopServo2.getPosition());
+            telemetry.addData("EncoderPositionH", TicksH);
+            telemetry.addData("EncoderPositionV", TicksV);
+            telemetry.addData("RevolutionsH", RevolutionsH);
+            telemetry.addData("RevolutionsV", RevolutionsV);
             telemetry.update();
         }
 
