@@ -150,8 +150,10 @@ public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
 
         BucketV.setDirection(Servo.Direction.FORWARD);
         ServoWheel.setDirection(CRServo.Direction.FORWARD);
+        ServoWheel.setPower(0);
         BlockServo.setDirection(Servo.Direction.FORWARD);
         BlockServo.setPosition(Servo.MIN_POSITION);
+
 
 
 
@@ -301,15 +303,16 @@ public class MeccanumDriveTeleopUsing_Encoders extends LinearOpMode {
 
             }
 
+
+
             if(gamepad2.a){
                 ServoWheel.setPower(1);
             }
+
             if(gamepad2.b){
                 ServoWheel.setPower(-1);
             }
-            else {
-                ServoWheel.setPower(0);
-            }
+
 
             //Blue sample holder
             if(gamepad2.right_bumper) {
